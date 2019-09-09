@@ -16,6 +16,8 @@ from tkinter import messagebox
 from tkinter.filedialog import askopenfilename
 import glob
 import os
+import ttkcalendar
+
 '''
 def unicode_csv_reader(unicode_csv_data, dialect=csv.excel, **kwargs):
     # csv.py doesn't do Unicode; encode temporarily as UTF-8:
@@ -79,17 +81,22 @@ class MainApplication():
                 ch_button.config(state=tk.NORMAL)
 
 
+    # def getdate(self):
+    #     pass
 
     def guiFunction(self):
         open_directory_button = tk.Button(self.top, command=self.openDirectory, height=2, width=12, text="Otwórz Folder",
-                                     activeforegroun="light sky blue", activebackground="steelblue",
+                                     activeforeground="light sky blue", activebackground="steelblue",
                                      bg="light sky blue")
-        open_directory_button .grid(column=0, row=0, columnspan=1, sticky=tk.N + tk.E + tk.W + tk.S)
 
         open_file_button = tk.Button(self.top, command=self.openFile, height=2, width=12, text="Otwórz Plik",
-                                     activeforegroun="light sky blue", activebackground="steelblue",
+                                     activeforeground="light sky blue", activebackground="steelblue",
                                      bg="light sky blue")
-        open_file_button.grid(column=1, row=0, columnspan=1, sticky=tk.N+tk.E+tk.W+tk.S)
+
+
+        # self.selected_date = tk.StringVar()
+        # entry = tk.Entry(self.top, textvariable=self.selected_date)
+        # entry_button = tk.Button(self.top, text="Choose a date", command=self.getdate)
 
         self.top.grid_columnconfigure(1, minsize=30)
         self.top.grid_columnconfigure(2, minsize=30)
@@ -179,10 +186,29 @@ class MainApplication():
         self.rad_temp = tk.Radiobutton(self.top, value=0, text='Temperatura', variable=self.rad_selected)
         self.rad_hum = tk.Radiobutton(self.top, value=1, text='Wilgotnosc', variable=self.rad_selected)
 
-        self.plotButton = tk.Button(self.top, command=self.clicked, height=2, width=12, text="Wykres", activeforegroun="light sky blue", activebackground="steelblue", bg="light sky blue")
+        self.plotButton = tk.Button(self.top,
+                                    command=lambda: self.clicked("one_graph"),
+                                    height=2,
+                                    width=12,
+                                    text="Wykres",
+                                    activeforeground="light sky blue",
+                                    activebackground="steelblue",
+                                    bg="light sky blue")
+        self.plotButton2 = tk.Button(self.top,
+                                    command=lambda: self.clicked("many_graphs"),
+                                    height=2,
+                                    width=12,
+                                    text="Wykres all in one",
+                                    activeforeground="light sky blue",
+                                    activebackground="steelblue",
+                                    bg="light sky blue")
 
 
         #grid data
+        open_directory_button .grid(column=1, row=0, columnspan=1, sticky=tk.N + tk.E + tk.W + tk.S)
+        open_file_button.grid(column=0, row=0, columnspan=1, sticky=tk.N+tk.E+tk.W+tk.S)
+        # entry.grid(column=0, row=1, columnspan=1, sticky=tk.N + tk.E + tk.W + tk.S)
+        # entry_button.grid(column=1, row=1, columnspan=1, sticky=tk.N + tk.E + tk.W + tk.S)
         self.check_Strefa1.grid(column=0, row=2, padx=0, pady=0, ipadx=0, ipady=0)
         self.check_Strefa2.grid(column=0, row=3, pady=0, ipadx=0, ipady=0)
         self.check_Strefa3.grid(column=0, row=4, padx=0, pady=0)
@@ -195,7 +221,8 @@ class MainApplication():
         self.check_Strefa10.grid(column=2, row=3, padx=0, pady=0)
         self.rad_temp.grid(column=0, row=6)
         self.rad_hum.grid(column=1, row=6)
-        self.plotButton.grid(column=1, row=8)
+        self.plotButton.grid(column=0, row=8)
+        self.plotButton2.grid(column=1, row=8)
 
         return None
 
@@ -216,7 +243,7 @@ class MainApplication():
         return checked_list
 
 
-    def clicked(self):
+    def clicked(self, version):
         cb_checked_list = self.cb_checked()
         cb_checked_list_string = []
         for x in cb_checked_list: #here I think we create string list of boxes which are checked
@@ -225,10 +252,16 @@ class MainApplication():
         radio_button_value = self.rad_selected.get()
         if (radio_button_value == 0):
             graph_title_name = "Temperatura"
-            Plotter().plot(cb_checked_list_string, self.df_temp, graph_title_name)
+            if version == "one_graph":
+                Plotter().plot(cb_checked_list_string, self.df_temp, graph_title_name)
+            elif version == "many_graphs":
+                Plotter().plotAllInOne(cb_checked_list_string, self.df_temp, graph_title_name)
         elif (radio_button_value == 1):
             graph_title_name = "Wilgotność"
-            Plotter().plot(cb_checked_list_string, self.df_hum, graph_title_name)
+            if version == "one_graph":
+                Plotter().plot(cb_checked_list_string, self.df_hum, graph_title_name)
+            elif version == "many_graphs":
+                Plotter().plotAllInOne(cb_checked_list_string, self.df_temp, graph_title_name)
 
         # else:
         #     print("something wrong with radio_button")
@@ -271,6 +304,73 @@ class Plotter():
 
 
         return None
+
+
+    def plotAllInOne(self, cb_checked_list_string, df, graph_title_name):
+        pandas.plotting.register_matplotlib_converters()  # conversion to matlibplot file
+
+
+        '''
+        ax = plt.gca()
+        df.plot(kind='line',x='Unnamed: 0',y='Strefa1',ax=ax)
+        plt.show()
+
+        '''
+
+        strefa_name = cb_checked_list_string
+        number_of_strefa = len(strefa_name)
+        # print(number_of_strefa)
+
+        number_of_separate_plots = 1
+        fig, ax = plt.subplots(nrows=number_of_separate_plots, ncols=1, squeeze=False, sharex='col',
+                               sharey='row')  # squeeze = False, always returns 2x2 matrix
+        # plt.suptitle("Temperature")
+        n = 0
+        # for n in range(len(strefa_name)):
+        for row in ax:
+            for col in row:
+                # ax.plot(df.iloc[:, 0], df.Strefa2)
+                ##ax.set_xticklabels= (df.iloc[:, 0])
+                for x in range(number_of_strefa):
+                    col.plot(df.Date_time, df[strefa_name[x]], label=strefa_name[x])
+                ##plt.xticks(df.iloc[:, 0], rotation='vertical')
+
+                plt.xlabel(df.columns[0] + " " + df.columns[1])  # name of x axis
+                # plt.ylabel(strefa_name[n]) #name of y axis - with many plots give only one input
+
+                col.set_ylabel(strefa_name[n])
+                col.set_yticklabels = (strefa_name[n])
+
+                self.autofmt_datetime_axis(col, False)
+
+                col.minorticks_on()
+                # this block works fine give some kind of dynamic legend
+                xtick_locator = mdates.AutoDateLocator()
+                xtick_formatter = mdates.ConciseDateFormatter(xtick_locator)
+                col.xaxis.set_major_locator(xtick_locator)
+                col.xaxis.set_major_formatter(xtick_formatter)
+
+
+                for label in col.xaxis.get_minorticklabels():
+                    label.set_color('black')
+                    label.set_rotation(45)
+                    label.set_fontsize(8)
+                    label.set_ha('right')
+
+                for label in col.xaxis.get_ticklabels():
+                    # label is a Text instance
+                    label.set_color('black')
+                    label.set_rotation(45)
+                    label.set_fontsize(8)
+                    label.set_ha('right')
+                n += 1
+
+        fig.subplots_adjust(bottom=0.2)
+        # fig.tight_layout()
+        fig.suptitle(graph_title_name)
+        plt.legend()
+        plt.show()
+        return
 
 
     def plot(self, cb_checked_list_string, df, graph_title_name):
