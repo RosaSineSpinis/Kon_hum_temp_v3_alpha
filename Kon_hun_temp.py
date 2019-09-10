@@ -17,6 +17,7 @@ from tkinter.filedialog import askopenfilename
 import glob
 import os
 import ttkcalendar
+import CalendarFrame
 
 '''
 def unicode_csv_reader(unicode_csv_data, dialect=csv.excel, **kwargs):
@@ -34,12 +35,13 @@ def utf_8_encoder(unicode_csv_data):
 '''
 
 
-class MainApplication():
-    def __init__(self, top, *args, **kwargs):
-        #self.tk.Frame.__init__(self, top, *args, **kwargs)
+class MainApplication(tk.Frame):
+    def __init__(self, parent, *args, **kwargs):
+        tk.Frame.__init__(self, parent, *args, **kwargs)
+        self.parent = parent
 
-        self.top = top
-        self.top.title("Temperatura i Wilgotność")
+        # self.top = top
+        self.parent.title("Temperatura i Wilgotność")
         #top.geometry('600x800')
         #canvas = tk.Canvas(top, height = HEIGHT, width = WIDTH)
         #canvas.pack()
@@ -75,7 +77,6 @@ class MainApplication():
         self.df_hum = PandasDataFrameListToOneData().listToOneDataFrameConcat(self.df_hum, hum_filename_list, hum_path_list)
 
 
-
         if not (self.df_hum.empty and self.df_temp.empty):
             for ch_button in self.cb_list_name_button:
                 ch_button.config(state=tk.NORMAL)
@@ -85,108 +86,54 @@ class MainApplication():
     #     pass
 
     def guiFunction(self):
-        open_directory_button = tk.Button(self.top, command=self.openDirectory, height=2, width=12, text="Otwórz Folder",
+        self.parent.open_directory_button = tk.Button(self.parent, command=self.openDirectory, height=2, width=12, text="Otwórz Folder",
+                                          activeforeground="light sky blue", activebackground="steelblue",
+                                          bg="light sky blue")
+
+        self.parent.open_file_button = tk.Button(self.parent, command=self.openFile, height=2, width=12, text="Otwórz Plik",
                                      activeforeground="light sky blue", activebackground="steelblue",
                                      bg="light sky blue")
 
-        open_file_button = tk.Button(self.top, command=self.openFile, height=2, width=12, text="Otwórz Plik",
-                                     activeforeground="light sky blue", activebackground="steelblue",
-                                     bg="light sky blue")
+        self.parent.selected_date = tk.StringVar()
+        # entry = tk.Entry(self.parent, textvariable=self.selected_date)
+        # entry_button = tk.Button(self.parent, text="Choose a date", command=self.getdate)
+        self.parent.calendar_frame_begin = CalendarFrame.CalendarFrame(self.parent, "Data poczatakowa")
+        self.parent.calendar_frame_end = CalendarFrame.CalendarFrame(self.parent, "Data koncowa")
 
-
-        # self.selected_date = tk.StringVar()
-        # entry = tk.Entry(self.top, textvariable=self.selected_date)
-        # entry_button = tk.Button(self.top, text="Choose a date", command=self.getdate)
-
-        self.top.grid_columnconfigure(1, minsize=30)
-        self.top.grid_columnconfigure(2, minsize=30)
-        self.top.grid_columnconfigure(3, minsize=30)
-
-
-        self.checkVar1 = tk.StringVar()
-        self.checkVar1.set(False)  # set check state
-        self.check_Strefa1 = tk.Checkbutton(self.top, text='Strefa1', var=self.checkVar1,  onvalue="Strefa1", offvalue=False, height=2, width=5, state=tk.DISABLED)
-
-        self.checkVar2 = tk.StringVar()
-        self.checkVar2.set(False)  # set check state
-        self.check_Strefa2 = tk.Checkbutton(self.top, text='Strefa2', var=self.checkVar2, onvalue="Strefa2", offvalue=False, height=2, width=5, state=tk.DISABLED)
-
-        self.checkVar3 = tk.StringVar()
-        self.checkVar3.set(False)  # set check state
-        self.check_Strefa3 = tk.Checkbutton(self.top, text='Strefa3', var=self.checkVar3, onvalue="Strefa3", offvalue=False, height=2, width=5, state=tk.DISABLED)
-
-        self.checkVar4 = tk.StringVar()
-        self.checkVar4.set(False)  # set check state
-        self.check_Strefa4 = tk.Checkbutton(self.top, text='Strefa4', var=self.checkVar4, onvalue="Strefa4", offvalue=False, height=2, width=5, state=tk.DISABLED)
-
-        self.checkVar5 = tk.StringVar()
-        self.checkVar5.set(False)  # set check state
-        self.check_Strefa5 = tk.Checkbutton(self.top, text='Strefa5', var=self.checkVar5, onvalue="Strefa5", offvalue=False, height=2, width=5, state=tk.DISABLED)
-
-        self.checkVar6 = tk.StringVar()
-        self.checkVar6.set(False)  # set check state
-        self.check_Strefa6 = tk.Checkbutton(self.top, text='Strefa6', var=self.checkVar6, onvalue="Strefa6", offvalue=False, height=2, width=5, state=tk.DISABLED)
-
-        self.checkVar7 = tk.StringVar()
-        self.checkVar7.set(False)  # set check state
-        self.check_Strefa7 = tk.Checkbutton(self.top, text='Strefa7', var=self.checkVar7, onvalue="Strefa7", offvalue=False, height=2, width=5, state=tk.DISABLED)
-
-        self.checkVar8 = tk.StringVar()
-        self.checkVar8.set(False)  # set check state
-        self.check_Strefa8 = tk.Checkbutton(self.top, text='Strefa8', var=self.checkVar8, onvalue="Strefa8", offvalue=False, height=2, width=5, state=tk.DISABLED)
-
-        self.checkVar9 = tk.StringVar()
-        self.checkVar9.set(False)  # set check state
-        self.check_Strefa9 = tk.Checkbutton(self.top, text='Strefa9', var=self.checkVar9, onvalue="Strefa9", offvalue=False, height=2, width=5, state=tk.DISABLED)
-
-        self.checkVar10 = tk.StringVar()
-        self.checkVar10.set(False)  # set check state
-        self.check_Strefa10 = tk.Checkbutton(self.top, text='Strefa10', var=self.checkVar10, onvalue="Strefa10", offvalue=False, height=2, width=5, state=tk.DISABLED)
+        self.parent.grid_columnconfigure(1, minsize=30)
+        self.parent.grid_columnconfigure(2, minsize=30)
+        self.parent.grid_columnconfigure(3, minsize=30)
 
         self.cb_list_name = [
-        'Strefa1',
-        'Strefa2',
-        'Strefa3',
-        'Strefa4',
-        'Strefa5',
-        'Strefa6',
-        'Strefa7',
-        'Strefa8',
-        'Strefa9',
-        'Strefa10'
+            'Strefa1',
+            'Strefa2',
+            'Strefa3',
+            'Strefa4',
+            'Strefa5',
+            'Strefa6',
+            'Strefa7',
+            'Strefa8',
+            'Strefa9',
+            'Strefa10'
         ]
+        self.cb_list_var = []
+        self.cb_list_name_button = []
 
-        self.cb_list_name_button = [
-        self.check_Strefa1,
-        self.check_Strefa2,
-        self.check_Strefa3,
-        self.check_Strefa4,
-        self.check_Strefa5,
-        self.check_Strefa6,
-        self.check_Strefa7,
-        self.check_Strefa8,
-        self.check_Strefa9,
-        self.check_Strefa10
-        ]
 
-        self.cb_list_var = [
-        self.checkVar1,
-        self.checkVar2,
-        self.checkVar3,
-        self.checkVar4,
-        self.checkVar5,
-        self.checkVar6,
-        self.checkVar7,
-        self.checkVar8,
-        self.checkVar9,
-        self.checkVar10
-        ]
+        for idx, value_label_name in enumerate(self.cb_list_name):
+            self.cb_list_var.append(tk.StringVar())
+            self.cb_list_var[idx].set(False)
+            x = tk.Checkbutton(self.parent, text = value_label_name, var = self.cb_list_var[idx],  onvalue = value_label_name, offvalue=False, height=2, width=5, state=tk.DISABLED)
+            self.cb_list_name_button.append(x)
 
-        self.rad_selected = tk.IntVar()
-        self.rad_temp = tk.Radiobutton(self.top, value=0, text='Temperatura', variable=self.rad_selected)
-        self.rad_hum = tk.Radiobutton(self.top, value=1, text='Wilgotnosc', variable=self.rad_selected)
 
-        self.plotButton = tk.Button(self.top,
+
+
+        self.parent.rad_selected = tk.IntVar()
+        self.parent.rad_temp = tk.Radiobutton(self.parent, value=0, text='Temperatura', variable=self.parent.rad_selected)
+        self.parent.rad_hum = tk.Radiobutton(self.parent, value=1, text='Wilgotnosc', variable=self.parent.rad_selected)
+
+        self.parent.plotButton = tk.Button(self.parent,
                                     command=lambda: self.clicked("one_graph"),
                                     height=2,
                                     width=12,
@@ -194,35 +141,37 @@ class MainApplication():
                                     activeforeground="light sky blue",
                                     activebackground="steelblue",
                                     bg="light sky blue")
-        self.plotButton2 = tk.Button(self.top,
-                                    command=lambda: self.clicked("many_graphs"),
-                                    height=2,
-                                    width=12,
-                                    text="Wykres all in one",
-                                    activeforeground="light sky blue",
-                                    activebackground="steelblue",
-                                    bg="light sky blue")
+        self.parent.plotButton2 = tk.Button(self.parent,
+                                     command=lambda: self.clicked("many_graphs"),
+                                     height=2,
+                                     width=12,
+                                     text="Wykres all in one",
+                                     activeforeground="light sky blue",
+                                     activebackground="steelblue",
+                                     bg="light sky blue")
 
 
         #grid data
-        open_directory_button .grid(column=1, row=0, columnspan=1, sticky=tk.N + tk.E + tk.W + tk.S)
-        open_file_button.grid(column=0, row=0, columnspan=1, sticky=tk.N+tk.E+tk.W+tk.S)
+        self.parent.open_directory_button .grid(column=1, row=0, columnspan=1, sticky=tk.N + tk.E + tk.W + tk.S)
+        self.parent.open_file_button.grid(column=0, row=0, columnspan=1, sticky=tk.N+tk.E+tk.W+tk.S)
         # entry.grid(column=0, row=1, columnspan=1, sticky=tk.N + tk.E + tk.W + tk.S)
         # entry_button.grid(column=1, row=1, columnspan=1, sticky=tk.N + tk.E + tk.W + tk.S)
-        self.check_Strefa1.grid(column=0, row=2, padx=0, pady=0, ipadx=0, ipady=0)
-        self.check_Strefa2.grid(column=0, row=3, pady=0, ipadx=0, ipady=0)
-        self.check_Strefa3.grid(column=0, row=4, padx=0, pady=0)
-        self.check_Strefa4.grid(column=0, row=5, padx=0, pady=0)
-        self.check_Strefa5.grid(column=1, row=2, padx=0, pady=0)
-        self.check_Strefa6.grid(column=1, row=3, padx=0, pady=0)
-        self.check_Strefa7.grid(column=1, row=4, padx=0, pady=0)
-        self.check_Strefa8.grid(column=1, row=5, padx=0, pady=0)
-        self.check_Strefa9.grid(column=2, row=2, padx=0, pady=0)
-        self.check_Strefa10.grid(column=2, row=3, padx=0, pady=0)
-        self.rad_temp.grid(column=0, row=6)
-        self.rad_hum.grid(column=1, row=6)
-        self.plotButton.grid(column=0, row=8)
-        self.plotButton2.grid(column=1, row=8)
+        self.parent.calendar_frame_begin.grid(column=0, row=1, columnspan=3, sticky=tk.N + tk.E + tk.W + tk.S)
+        self.parent.calendar_frame_end.grid(column=0, row=2, columnspan=3, sticky=tk.N + tk.E + tk.W + tk.S)
+
+        column_int = 0;
+        row_int = 3;
+        end_row_int =6;
+        for button in self.cb_list_name_button:
+            button.grid(column = column_int, row = row_int, padx=0, pady=0, ipadx=0, ipady=0)
+            row_int = row_int + 1
+            if(row_int == (end_row_int+1)): #one more than is int number
+                column_int = column_int + 1
+                row_int = 3
+        self.parent.rad_temp.grid(column=0, row=7)
+        self.parent.rad_hum.grid(column=1, row=7)
+        self.parent.plotButton.grid(column=0, row=9)
+        self.parent.plotButton2.grid(column=1, row=9)
 
         return None
 
@@ -249,7 +198,7 @@ class MainApplication():
         for x in cb_checked_list: #here I think we create string list of boxes which are checked
             cb_checked_list_string.append(str(x.get()))
 
-        radio_button_value = self.rad_selected.get()
+        radio_button_value = self.parent.rad_selected.get()
         if (radio_button_value == 0):
             graph_title_name = "Temperatura"
             if version == "one_graph":
@@ -282,7 +231,7 @@ class MainApplication():
 
     """for this_row, text in enumerate(cb_list):
     cb_intvar.append(tk.IntVar())
-    tk.Checkbutton(top, text=text, variable=cb_intvar[-1],
+    tk.Checkbutton(parent, text=text, variable=cb_intvar[-1],
                    command=cb_checked).grid(row=this_row,
                    column=0, sticky='w')"""
 
@@ -307,6 +256,7 @@ class Plotter():
 
 
     def plotAllInOne(self, cb_checked_list_string, df, graph_title_name):
+        # TODO exceptions while closed without user
         pandas.plotting.register_matplotlib_converters()  # conversion to matlibplot file
 
 
@@ -578,10 +528,10 @@ class openFileClass():
         pass
 
     def openFile(self, cb_list_name_butto, df):
-        top.filename = tk.filedialog.askopenfilename(initialdir="C:/Users/piotr/PycharmProjects/Kon_hum_temp",
+        parent.filename = tk.filedialog.askopenfilename(initialdir="C:/Users/piotr/PycharmProjects/Kon_hum_temp",
                                                      title="Select *.CSV file",
                                                      filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
-        filename = top.filename
+        filename = parent.filename
         if not filename:
             return df
         # print(filename)
