@@ -168,6 +168,7 @@ class MainApplication(tk.Frame):
             if(row_int == (end_row_int+1)): #one more than is int number
                 column_int = column_int + 1
                 row_int = 3
+
         self.parent.rad_temp.grid(column=0, row=7)
         self.parent.rad_hum.grid(column=1, row=7)
         self.parent.plotButton.grid(column=0, row=9)
