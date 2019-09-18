@@ -12,13 +12,20 @@ except ImportError: # py3k
     import tkinter.font as tkFont
 
 from tkinter import ttk
+from datetime import datetime
 
 def get_calendar(locale, fwday):
     # instantiate proper calendar class
+    print("get_calendar function")
     if locale is None:
+        print("we are in if")
+        print(fwday)
         return calendar.TextCalendar(fwday)
     else:
-        return calendar.LocaleTextCalendar(fwday, locale)
+        print("we are in else")
+        print(fwday)
+        print(locale)
+        return calendar.LocaleTextCalendar(fwday, locale) #locale name of days and moths I think Monday...
 
 class Calendar(ttk.Frame):
     # XXX ToDo: cget and configure
@@ -32,20 +39,35 @@ class Calendar(ttk.Frame):
             locale, firstweekday, year, month, selectbackground,
             selectforeground
         """
+        # print("kw is below")
+        # print(kw)
         # remove custom options from kw before initializating ttk.Frame
         fwday = kw.pop('firstweekday', calendar.MONDAY)
         year = kw.pop('year', self.datetime.now().year)
         month = kw.pop('month', self.datetime.now().month)
-        locale = kw.pop('locale', None)
+        locale = kw.pop('locale', None) # no idea what it is
         sel_bg = kw.pop('selectbackground', '#ecffc4')
         sel_fg = kw.pop('selectforeground', '#05640e')
+        self.beg_date = kw.pop('beg_date', "04/08/2018") #initial parameters - change for testing
+        self.end_date = kw.pop('end_date', "08/01/2019") # initial parameters - change for testing
 
-        self._date = self.datetime(year, month, 1)
-        self._selection = None # no date selected
+        self._beg_date = datetime.strptime(self.beg_date, '%d/%m/%Y').date()
+        self._end_date = datetime.strptime(self.end_date, '%d/%m/%Y').date()
+
+
+        self._date = self.datetime(self._beg_date.year, self._beg_date.month, 1)
+        print("First self._date below")
+        print(self._date)
+        self._selection = None # no date selected # - date to the output
 
         ttk.Frame.__init__(self, master, **kw)
-
+        print("just before get_calendar")
         self._cal = get_calendar(locale, fwday)
+        # print(self._cal.yeardayscalendar(2019))
+        # print("")
+        # print(self._cal.yeardatescalendar(2019))
+        # print("")
+        # print(self._cal.yeardays2calendar(2019))
 
         self.__setup_styles()       # creates custom styles
         self.__place_widgets()      # pack/grid used widgets
@@ -56,8 +78,12 @@ class Calendar(ttk.Frame):
         # store items ids, used for insertion later
         self._items = [self._calendar.insert('', 'end', values='')
                             for _ in range(6)]
+        # print("items")
+        # print(self._items)
+
         # insert dates in the currently empty calendar
         self._build_calendar()
+        print("end of initializer")
 
     def __setitem__(self, item, value):
         if item in ('year', 'month'):
@@ -132,18 +158,57 @@ class Calendar(ttk.Frame):
         height = height[:height.index('+')]
         self._calendar.master.minsize(width, height)
 
-    def _build_calendar(self):
-        year, month = self._date.year, self._date.month
+    # def _build_calendar(self):
+    #     year, month = self._date.year, self._date.month #here we replace it with the smallest year and month
+    #     header = self._cal.formatmonthname(year, month, 0)
+    #     self._header['text'] = header.title()
+    #     cal = self._cal.monthdayscalendar(year, month)
+    #     for indx, item in enumerate(self._items):
+    #         week = cal[indx] if indx < len(cal) else []
+    #         fmt_week = [('%02d' % day) if day else '' for day in week]
+    #         self._calendar.item(item, values=fmt_week)
 
-        # update header text (Month, YEAR)
+
+    def _build_calendar(self):
+        ''' Added function which takes the earliest and latest day from the file and create calendar between them'''
+        year, month = self._date.year, self._date.month #here we replace it with the smallest year and month
+        print(self._beg_date)
+        print(self._end_date)
+
+        # update header of the widget text (Month, YEAR)
         header = self._cal.formatmonthname(year, month, 0)
         self._header['text'] = header.title()
-
         # update calendar shown dates
         cal = self._cal.monthdayscalendar(year, month)
+
         for indx, item in enumerate(self._items):
             week = cal[indx] if indx < len(cal) else []
-            fmt_week = [('%02d' % day) if day else '' for day in week]
+
+            if year > self._beg_date.year and year < self._end_date.year:
+                '''one solution'''
+                fmt_week = [('%02d' % day) if day else '' for day in week]
+
+            elif year > self._beg_date.year and year == self._end_date.year:
+                if month == self._end_date.month:
+                    fmt_week = [('%02d' % day) if (day and day <= self._end_date.day) else '' for day in week]
+                else:
+                    fmt_week = [('%02d' % day) if day else '' for day in week]
+
+            elif year == self._beg_date.year and year < self._end_date.year:
+                if month == self._beg_date.month:
+                    fmt_week = [('%02d' % day) if (day and day >= self._beg_date.day) else '' for day in week]
+                else:
+                    fmt_week = [('%02d' % day) if day else '' for day in week]
+
+            elif year == self._beg_date.year and year == self._end_date.year:
+                if month > self._beg_date.month and month < self._end_date.month:
+                    fmt_week = [('%02d' % day) if day else '' for day in week]
+                elif month > self._beg_date.month and month == self._end_date.moth:
+                    fmt_week = [('%02d' % day) if (day and day <= self._end_date.day) else '' for day in week]
+                elif month == self._beg_date.month and month < self._end_date.month:
+                    fmt_week = [('%02d' % day) if (day and day >= self._beg_date.day) else '' for day in week]
+                elif month == self._beg_date.month and month == self._end_date.month:
+                    fmt_week = [('%02d' % day) if (day and day >= self._beg_date.day and day <= self._end_date.day) else '' for day in week]
             self._calendar.item(item, values=fmt_week)
 
     def _show_selection(self, text, bbox):
@@ -184,25 +249,43 @@ class Calendar(ttk.Frame):
 
         # update and then show selection
         text = '%02d' % text
-        self._selection = (text, item, column)
+        self._selection = (text, item, column) #text is day I think
         self._show_selection(text, bbox)
 
     def _prev_month(self):
         """Updated calendar to show the previous month."""
-        self._canvas.place_forget()
-
-        self._date = self._date - self.timedelta(days=1)
-        self._date = self.datetime(self._date.year, self._date.month, 1)
+        print("")
+        print("")
+        print("_prev_month function ")
+        self._canvas.place_forget() #here we clean canavas probably
+        new_date = self._date - self.timedelta(days=1)
+        if new_date.year > self._beg_date.year:
+            self._date = new_date
+        elif new_date.year == self._beg_date.year and new_date.month >= self._beg_date.month:
+            self._date = new_date
+        else:
+            pass
+        # self._date = self._date - self.timedelta(days=1) #here from 1.month - 1 day = 31.(month-1)
+        self._date = self.datetime(self._date.year, self._date.month, 1) #here change 31.(month-1) to 1.(month-1)
         self._build_calendar() # reconstuct calendar
+
 
     def _next_month(self):
         """Update calendar to show the next month."""
-        self._canvas.place_forget()
+        print("")
+        print("")
+        print("_next_month function ")
 
-        year, month = self._date.year, self._date.month
-        self._date = self._date + self.timedelta(
-            days=calendar.monthrange(year, month)[1] + 1)
-        self._date = self.datetime(self._date.year, self._date.month, 1)
+        self._canvas.place_forget()
+        year, month = self._date.year, self._date.month # get year and month of the previous canvas
+        new_date = self._date + self.timedelta(days=calendar.monthrange(year, month)[1] + 1) # 1 month + 30 + 1 day = new month
+        if new_date.year < self._end_date.year:
+            self._date = new_date
+        elif new_date.year == self._end_date.year and new_date.month <= self._end_date.month:
+            self._date = new_date
+        else:
+            pass
+        self._date = self.datetime(self._date.year, self._date.month, 1) #reset to be sure there is 1.(month+1)
         self._build_calendar() # reconstruct calendar
 
     # Properties
@@ -214,7 +297,7 @@ class Calendar(ttk.Frame):
             return None
 
         year, month = self._date.year, self._date.month
-        return self.datetime(year, month, int(self._selection[0]))
+        return self.datetime(year, month, int(self._selection[0])) #take what is clicked + add month and year
 
 def test():
     import sys

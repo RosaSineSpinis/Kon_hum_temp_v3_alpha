@@ -48,10 +48,14 @@ class MainApplication(tk.Frame):
         self.cb_list_name = []
         self.cb_list_name_button = []
         self.cb_list_var = []
-        self.guiFunction()
         self.df = pandas.DataFrame()
         self.df_temp = pandas.DataFrame()
         self.df_hum = pandas.DataFrame()
+        self.beg_date_temp = "a"
+        self.end_date_temp = "b"
+        self.beg_date_hum = "c"
+        self.end_date_hum = "d"
+        self.guiFunction()
 
     def openFile(self):
         #openFileClass().openFile() used to generate one file
@@ -70,17 +74,39 @@ class MainApplication(tk.Frame):
         temp_path_list = []
         temp_filename_list = []
 
+        ''' Get directories and filenames, creates lists'''
         temp_filename_list, temp_path_list = OpenDirectoryPathClass().walkDirectoryTopDown(path, ".csv", temp_filename_list, "TEMP", temp_path_list)
         hum_filename_list, hum_path_list = OpenDirectoryPathClass().walkDirectoryTopDown(path, ".csv", hum_filename_list, "RH", hum_path_list)
 
+        ''' Open files and merge csv. files together'''
         self.df_temp = PandasDataFrameListToOneData().listToOneDataFrameConcat(self.df_temp, temp_filename_list, temp_path_list)
         self.df_hum = PandasDataFrameListToOneData().listToOneDataFrameConcat(self.df_hum, hum_filename_list, hum_path_list)
+
+        '''Get beginng and ending date'''
+        self.beg_date_temp = PandasDataFrameListToOneData().obtainBeginningDate(self.df_temp)
+        self.end_date_temp = PandasDataFrameListToOneData().obtainEndingDate(self.df_temp)
+        self.beg_date_hum = PandasDataFrameListToOneData().obtainBeginningDate(self.df_hum)
+        self.end_date_hum = PandasDataFrameListToOneData().obtainEndingDate(self.df_hum)
+
+        '''Compare data between temp and hum - choose earliest and latest'''
+        #ToDo function here
+
+
+        # print(self.beg_date_temp)
+        # print(self.end_date_temp)
 
 
         if not (self.df_hum.empty and self.df_temp.empty):
             for ch_button in self.cb_list_name_button:
                 ch_button.config(state=tk.NORMAL)
 
+        # self.parent.calendar_frame_begin.config(self, beg_date=self.beg_date_temp, end_date=self.end_date_temp)
+        # self.parent.calendar_frame_end = CalendarFrame.CalendarFrame(self, "Data koncowa", beg_date=self.beg_date_temp, end_date=self.end_date_temp)
+
+        self.parent.calendar_frame_begin.beg_date = self.beg_date_temp
+        self.parent.calendar_frame_begin.end_date = self.end_date_temp
+        self.parent.calendar_frame_end.beg_date = self.beg_date_temp
+        self.parent.calendar_frame_end.end_date = self.end_date_temp
 
     # def getdate(self):
     #     pass
@@ -94,15 +120,15 @@ class MainApplication(tk.Frame):
                                      activeforeground="light sky blue", activebackground="steelblue",
                                      bg="light sky blue")
 
-        self.parent.selected_date = tk.StringVar()
-        # entry = tk.Entry(self.parent, textvariable=self.selected_date)
-        # entry_button = tk.Button(self.parent, text="Choose a date", command=self.getdate)
-        self.parent.calendar_frame_begin = CalendarFrame.CalendarFrame(self.parent, "Data poczatakowa")
-        self.parent.calendar_frame_end = CalendarFrame.CalendarFrame(self.parent, "Data koncowa")
+        print("check date in gui")
+        print(self.beg_date_temp)
+        # self.parent.selected_date = tk.StringVar()
 
-        self.parent.grid_columnconfigure(1, minsize=30)
-        self.parent.grid_columnconfigure(2, minsize=30)
-        self.parent.grid_columnconfigure(3, minsize=30)
+        self.parent.calendar_frame_begin = CalendarFrame.CalendarFrame(self.parent, "Data poczatakowa", beg_date=self.beg_date_temp, end_date=self.end_date_temp)
+        self.parent.calendar_frame_end = CalendarFrame.CalendarFrame(self.parent, "Data koncowa", beg_date=self.beg_date_temp, end_date=self.end_date_temp)
+
+        # self.selected_date = CalendarFrame.CalendarFrame.getEntry()
+        # print(self.selected_date)
 
         self.cb_list_name = [
             'Strefa1',
@@ -152,10 +178,12 @@ class MainApplication(tk.Frame):
 
 
         #grid data
+        self.parent.grid_columnconfigure(1, minsize=30)
+        self.parent.grid_columnconfigure(2, minsize=30)
+        self.parent.grid_columnconfigure(3, minsize=30)
+
         self.parent.open_directory_button .grid(column=1, row=0, columnspan=1, sticky=tk.N + tk.E + tk.W + tk.S)
         self.parent.open_file_button.grid(column=0, row=0, columnspan=1, sticky=tk.N+tk.E+tk.W+tk.S)
-        # entry.grid(column=0, row=1, columnspan=1, sticky=tk.N + tk.E + tk.W + tk.S)
-        # entry_button.grid(column=1, row=1, columnspan=1, sticky=tk.N + tk.E + tk.W + tk.S)
         self.parent.calendar_frame_begin.grid(column=0, row=1, columnspan=3, sticky=tk.N + tk.E + tk.W + tk.S)
         self.parent.calendar_frame_end.grid(column=0, row=2, columnspan=3, sticky=tk.N + tk.E + tk.W + tk.S)
 
@@ -193,6 +221,9 @@ class MainApplication(tk.Frame):
 
 
     def clicked(self, version):
+        print("Entry below ")
+        print(self.parent.calendar_frame_begin.getEntry())
+        print(self.parent.calendar_frame_end.getEntry())
         cb_checked_list = self.cb_checked()
         cb_checked_list_string = []
         for x in cb_checked_list: #here I think we create string list of boxes which are checked
@@ -488,7 +519,30 @@ class PandasDataFrameListToOneData():
                 frames.append(df)
                 df = pandas.concat(frames, ignore_index=True)
             df.sort_values(by=['Date_time'], inplace=True, ascending=True)
+            # print(df.iloc[-1, df.columns.get_loc('Date')])
             return df
+        except pandas.errors.EmptyDataError:
+            pass
+        except ValueError:
+            pass
+
+
+    def obtainBeginningDate(self, df):
+        try:
+            return df.iloc[0, df.columns.get_loc('Date')]
+                # print(df.iloc[0,1])
+                # df.iloc['Date_time']
+        except pandas.errors.EmptyDataError:
+            pass
+        except ValueError:
+            pass
+
+
+    def obtainEndingDate(self, df):
+        try:
+            return df.iloc[-1, df.columns.get_loc('Date')]
+                # print(df.iloc[0,1])
+                # df.iloc['Date_time']
         except pandas.errors.EmptyDataError:
             pass
         except ValueError:
