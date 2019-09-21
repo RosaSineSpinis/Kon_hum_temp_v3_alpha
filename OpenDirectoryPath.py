@@ -8,7 +8,7 @@ class OpenDirectoryPathClass():
 
     def openFile(self, cb_list_name_butto, df):
 
-        directory = tk.filedialog.askdirectory(initialdir="C:/Users/piotr/PycharmProjects/Kon_hum_temp")
+        directory = tk.filedialog.askdirectory(initialdir="C:/Users/piotr/PycharmProjects/Kon_hum_temp_v3/HMI-000")
         return directory
 
     def walkDirectoryTopDown(self, path, extension, filename_list, phrase_in_filename, path_list):

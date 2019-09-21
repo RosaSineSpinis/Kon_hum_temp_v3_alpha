@@ -127,6 +127,9 @@ class MainApplication(tk.Frame):
     # def getdate(self):
     #     pass
 
+
+
+
     def guiFunction(self):
         self.parent.open_directory_button = tk.Button(self.parent, command=self.openDirectory, height=2, width=12, text="Otwórz Folder",
                                           activeforeground="light sky blue", activebackground="steelblue",
@@ -145,6 +148,8 @@ class MainApplication(tk.Frame):
 
         # self.selected_date = CalendarFrame.CalendarFrame.getEntry()
         # print(self.selected_date)
+
+
 
         self.cb_list_name = [
             'Strefa1',
