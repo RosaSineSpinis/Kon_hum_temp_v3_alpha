@@ -59,97 +59,6 @@ class MainApplication(tk.Frame):
         self.end_date_temp = "b"
         self.beg_date_hum = "c"
         self.end_date_hum = "d"
-        self.guiFunction()
-
-    def openFile(self):
-        #openFileClass().openFile() used to generate one file
-        self.df = openFileClass().openFile(self.cb_list_name_button, self.df)
-        if not self.df.empty:
-            for ch_button in self.cb_list_name_button:
-                ch_button.config(state=tk.NORMAL)
-
-    def openDirectory(self):
-
-        #OpenDirectoryPathClass() open directory class and walk through direcotry
-        path = OpenDirectoryPath.OpenDirectoryPathClass().openFile(self.cb_list_name_button, self.df)
-        print(path)
-        hum_path_list = []
-        hum_filename_list = []
-        temp_path_list = []
-        temp_filename_list = []
-
-        ''' Get directories and filenames, creates lists'''
-        temp_filename_list, temp_path_list = OpenDirectoryPath.OpenDirectoryPathClass().walkDirectoryTopDown(path, ".csv", temp_filename_list, "TEMP", temp_path_list)
-        hum_filename_list, hum_path_list = OpenDirectoryPath.OpenDirectoryPathClass().walkDirectoryTopDown(path, ".csv", hum_filename_list, "RH", hum_path_list)
-
-        ''' Open files and merge csv. files together'''
-        self.df_temp = PandasDataMerge.PandasDataFrameListToOneData().listToOneDataFrameConcat(self.df_temp, temp_filename_list, temp_path_list)
-        self.df_hum = PandasDataMerge.PandasDataFrameListToOneData().listToOneDataFrameConcat(self.df_hum, hum_filename_list, hum_path_list)
-
-        self.df_temp.to_csv("whole_temp.csv")
-        self.df_hum.to_csv("whole_hum.csv")
-
-        '''Get beginng and ending date'''
-        self.beg_date_temp = PandasDataMerge.PandasDataFrameListToOneData().obtainBeginningDate(self.df_temp).date().strftime('%d/%m/%Y')
-        self.end_date_temp = PandasDataMerge.PandasDataFrameListToOneData().obtainEndingDate(self.df_temp).date().strftime('%d/%m/%Y')
-        self.beg_date_hum = PandasDataMerge.PandasDataFrameListToOneData().obtainBeginningDate(self.df_hum).date().strftime('%d/%m/%Y')
-        self.end_date_hum = PandasDataMerge.PandasDataFrameListToOneData().obtainEndingDate(self.df_hum).date().strftime('%d/%m/%Y')
-
-        print(type(self.beg_date_temp))
-        print(type(self.end_date_temp))
-        print(self.beg_date_temp)
-        print(self.end_date_temp)
-        print(self.beg_date_hum)
-        print(self.end_date_hum)
-
-        #'{:%d/%m/%Y}'.datetime.format(
-        # s.dt.strftime('%Y/%m/%d')
-        '''Compare data between temp and hum - choose earliest and latest'''
-        #ToDo function here
-
-
-        # print(self.beg_date_temp)
-        # print(self.end_date_temp)
-
-
-        if not (self.df_hum.empty and self.df_temp.empty):
-            for ch_button in self.cb_list_name_button:
-                ch_button.config(state=tk.NORMAL)
-
-        # self.parent.calendar_frame_begin.config(self, beg_date=self.beg_date_temp, end_date=self.end_date_temp)
-        # self.parent.calendar_frame_end = CalendarFrame.CalendarFrame(self, "Data koncowa", beg_date=self.beg_date_temp, end_date=self.end_date_temp)
-
-        self.parent.calendar_frame_begin.beg_date = self.beg_date_temp
-        self.parent.calendar_frame_begin.end_date = self.end_date_temp
-        self.parent.calendar_frame_end.beg_date = self.beg_date_temp
-        self.parent.calendar_frame_end.end_date = self.end_date_temp
-
-    # def getdate(self):
-    #     pass
-
-
-
-
-    def guiFunction(self):
-        self.parent.open_directory_button = tk.Button(self.parent, command=self.openDirectory, height=2, width=12, text="Otwórz Folder",
-                                          activeforeground="light sky blue", activebackground="steelblue",
-                                          bg="light sky blue")
-
-        self.parent.open_file_button = tk.Button(self.parent, command=self.openFile, height=2, width=12, text="Otwórz Plik",
-                                     activeforeground="light sky blue", activebackground="steelblue",
-                                     bg="light sky blue")
-
-        print("check date in gui")
-        print(self.beg_date_temp)
-        # self.parent.selected_date = tk.StringVar()
-
-        self.parent.calendar_frame_begin = CalendarFrame.CalendarFrame(self.parent, "Data poczatakowa", beg_date=self.beg_date_temp, end_date=self.end_date_temp)
-        self.parent.calendar_frame_end = CalendarFrame.CalendarFrame(self.parent, "Data koncowa", beg_date=self.beg_date_temp, end_date=self.end_date_temp)
-
-        # self.selected_date = CalendarFrame.CalendarFrame.getEntry()
-        # print(self.selected_date)
-
-
 
         self.cb_list_name = [
             'Strefa1',
@@ -163,6 +72,159 @@ class MainApplication(tk.Frame):
             'Strefa9',
             'Strefa10'
         ]
+
+        self.guiFunction()
+
+    def openFile(self):
+        #openFileClass().openFile() used to generate one file
+        self.df = openFileClass().openFile(self.cb_list_name_button, self.df)
+        if not self.df.empty:
+            for ch_button in self.cb_list_name_button:
+                ch_button.config(state=tk.NORMAL)
+
+    def openDirectory(self):
+
+        try:
+            #OpenDirectoryPathClass() open directory class and walk through direcotry
+            path = OpenDirectoryPath.OpenDirectoryPathClass().openFile(self.cb_list_name_button, self.df)
+            # print(path)
+            hum_path_list = []
+            hum_filename_list = []
+            temp_path_list = []
+            temp_filename_list = []
+
+            ''' Get directories and filenames, creates lists'''
+            #changes made ofr special init file
+            temp_filename_list, temp_path_list = OpenDirectoryPath.OpenDirectoryPathClass().walkDirectoryTopDown(path, ".csv", temp_filename_list, "TEMP", temp_path_list)
+
+            if not temp_filename_list: #check is empty
+                temp_filename_list, temp_path_list = OpenDirectoryPath.OpenDirectoryPathClass().walkDirectoryTopDown(path,
+                                                                                                                     ".csv",
+                                                                                                                     temp_filename_list,
+                                                                                                                     "Temp",
+                                                                                                                     temp_path_list)
+
+            hum_filename_list, hum_path_list = OpenDirectoryPath.OpenDirectoryPathClass().walkDirectoryTopDown(path, ".csv", hum_filename_list, "RH", hum_path_list)
+
+            ''' Open files and merge csv. files together'''
+            self.df_temp = PandasDataMerge.PandasDataFrameListToOneData().listToOneDataFrameConcat(self.df_temp, temp_filename_list, temp_path_list)
+            self.df_hum = PandasDataMerge.PandasDataFrameListToOneData().listToOneDataFrameConcat(self.df_hum, hum_filename_list, hum_path_list)
+
+            self.df_temp.to_csv("whole_temp.csv")
+            self.df_hum.to_csv("whole_hum.csv")
+
+            '''Get beginng and ending date'''
+            self.beg_date_temp = PandasDataMerge.PandasDataFrameListToOneData().obtainBeginningDate(self.df_temp).date().strftime('%d/%m/%Y')
+            self.end_date_temp = PandasDataMerge.PandasDataFrameListToOneData().obtainEndingDate(self.df_temp).date().strftime('%d/%m/%Y')
+            self.beg_date_hum = PandasDataMerge.PandasDataFrameListToOneData().obtainBeginningDate(self.df_hum).date().strftime('%d/%m/%Y')
+            self.end_date_hum = PandasDataMerge.PandasDataFrameListToOneData().obtainEndingDate(self.df_hum).date().strftime('%d/%m/%Y')
+            #
+            # print(type(self.beg_date_temp))
+            # print(type(self.end_date_temp))
+            # print(self.beg_date_temp)
+            # print(self.end_date_temp)
+            # print(self.beg_date_hum)
+            # print(self.end_date_hum)
+
+            #'{:%d/%m/%Y}'.datetime.format(
+            # s.dt.strftime('%Y/%m/%d')
+            '''Compare data between temp and hum - choose earliest and latest'''
+            #ToDo function here
+
+
+            # print(self.beg_date_temp)
+            # print(self.end_date_temp)
+
+            self.update_check_buttons(self.df_temp)
+
+            if not (self.df_hum.empty and self.df_temp.empty):
+                for ch_button in self.cb_list_name_button:
+                    ch_button.config(state=tk.NORMAL)
+
+            # self.parent.calendar_frame_begin.config(self, beg_date=self.beg_date_temp, end_date=self.end_date_temp)
+            # self.parent.calendar_frame_end = CalendarFrame.CalendarFrame(self, "Data koncowa", beg_date=self.beg_date_temp, end_date=self.end_date_temp)
+
+            self.parent.calendar_frame_begin.beg_date = self.beg_date_temp
+            self.parent.calendar_frame_begin.end_date = self.end_date_temp
+            self.parent.calendar_frame_end.beg_date = self.beg_date_temp
+            self.parent.calendar_frame_end.end_date = self.end_date_temp
+
+        except:
+            pass
+
+        # def getdate(self):
+
+    def removeCheckButtons(self):
+        '''takes list of variables'''
+        # print("removeCheckButtons")
+        for ch_button in self.cb_list_name_button:
+            ch_button.destroy()
+
+        self.cb_list_var.clear()
+        self.cb_list_name_button.clear()
+        self.cb_list_name.clear()
+
+        return
+
+
+    def addCheckButtons(self):
+        '''removes list of variables'''
+        # print("addCheckButtons")
+        for idx, value_label_name in enumerate(self.cb_list_name):
+            # print("for in addCheckButtons is working")
+            self.cb_list_var.append(tk.StringVar())
+            self.cb_list_var[idx].set(False)
+            x = tk.Checkbutton(self.parent, text=value_label_name, var=self.cb_list_var[idx], onvalue=value_label_name,
+                               offvalue=False, height=2, width=5, state=tk.DISABLED)
+            self.cb_list_name_button.append(x)
+        # print(self.cb_list_name_button)
+
+        return
+
+    def createCheckBoxListName(self, df):
+
+        check_box_list_name = []
+        for column in df.columns[2:]:
+            if column == "Date_time":
+                continue
+            elif not df.loc[:, column].isnull().all():
+                check_box_list_name.append(column)
+        # print(check_box_list_name)
+        return check_box_list_name
+
+    def update_check_buttons(self, df):
+        # print("update_check_buttons - working")
+        self.removeCheckButtons()
+        self.cb_list_name = self.createCheckBoxListName(df)
+        # print(self.cb_list_name)
+        self.addCheckButtons()
+        self.guiFunction()
+        self.parent.calendar_frame_begin.selected_date.set(self.beg_date_temp)
+        self.parent.calendar_frame_end.selected_date.set(self.end_date_temp)
+
+        pass
+
+    def guiFunction(self):
+        self.parent.open_directory_button = tk.Button(self.parent, command=self.openDirectory, height=2, width=12, text="Otwórz Folder",
+                                          activeforeground="light sky blue", activebackground="steelblue",
+                                          bg="light sky blue")
+
+        self.parent.open_file_button = tk.Button(self.parent, command=self.openFile, height=2, width=12, text="Otwórz Plik",
+                                     activeforeground="light sky blue", activebackground="steelblue",
+                                     bg="light sky blue")
+
+        # print("check date in gui")
+        # print(self.beg_date_temp)
+        # self.parent.selected_date = tk.StringVar()
+
+        self.parent.calendar_frame_begin = CalendarFrame.CalendarFrame(self.parent, "Data poczatakowa", beg_date=self.beg_date_temp, end_date=self.end_date_temp)
+        self.parent.calendar_frame_end = CalendarFrame.CalendarFrame(self.parent, "Data koncowa", beg_date=self.beg_date_temp, end_date=self.end_date_temp)
+
+        # self.selected_date = CalendarFrame.CalendarFrame.getEntry()
+        # print(self.selected_date)
+
+
+
         self.cb_list_var = []
         self.cb_list_name_button = []
 
@@ -170,7 +232,7 @@ class MainApplication(tk.Frame):
         for idx, value_label_name in enumerate(self.cb_list_name):
             self.cb_list_var.append(tk.StringVar())
             self.cb_list_var[idx].set(False)
-            x = tk.Checkbutton(self.parent, text = value_label_name, var = self.cb_list_var[idx],  onvalue = value_label_name, offvalue=False, height=2, width=5, state=tk.DISABLED)
+            x = tk.Checkbutton(self.parent, text=value_label_name, var = self.cb_list_var[idx],  onvalue = value_label_name, offvalue=False, height=2, width=5, state=tk.DISABLED)
             self.cb_list_name_button.append(x)
 
 
@@ -193,6 +255,14 @@ class MainApplication(tk.Frame):
                                      height=2,
                                      width=12,
                                      text="Wykres all in one",
+                                     activeforeground="light sky blue",
+                                     activebackground="steelblue",
+                                     bg="light sky blue")
+        self.parent.plotButton3 = tk.Button(self.parent,
+                                     command=self.clicked_export_csv,
+                                     height=2,
+                                     width=12,
+                                     text="Export to .csv",
                                      activeforeground="light sky blue",
                                      activebackground="steelblue",
                                      bg="light sky blue")
@@ -221,6 +291,7 @@ class MainApplication(tk.Frame):
         self.parent.rad_hum.grid(column=1, row=7)
         self.parent.plotButton.grid(column=0, row=9)
         self.parent.plotButton2.grid(column=1, row=9)
+        self.parent.plotButton3.grid(column=2, row=9)
 
         return None
 
@@ -240,6 +311,14 @@ class MainApplication(tk.Frame):
         # print("leaving cb_checked_function")
         return checked_list
 
+    def clicked_export_csv(self,):
+        radio_button_value = self.parent.rad_selected.get()
+        if (radio_button_value == 0):
+            self.df_temp.to_csv("EXPORTED_TEMP.csv")
+        elif (radio_button_value == 1):
+            self.df_hum.to_csv("EXPORTED_HUM.csv")
+        return
+
 
     def clicked(self, version):
 
@@ -249,38 +328,40 @@ class MainApplication(tk.Frame):
             beginning_date = self.parent.calendar_frame_begin.selected_date.get()#begging determined by users choice in Entry
             ending_date = self.parent.calendar_frame_end.selected_date.get()#end determined by users choice in Entry
             '''find index of row where to cut at the beg and end'''
-            print('Checking for in clicked')
             idx_beg = 0
             idx_end = 0
-            for idx, x in enumerate(df.loc[:,'Date']):
-                if x == pandas.to_datetime(beginning_date, format='%d/%m/%Y'):
-                    # print("x= " + str(x) + " beg_date= " + str(pandas.to_datetime(beginning_date, format='%d/%m/%Y')))
-                    idx_beg = idx
-                    # print(idx)
-                    break
-            for idx, x in enumerate(df.loc[:, 'Date']):
-                if x == pandas.to_datetime(ending_date, format='%d/%m/%Y'):
-                    idx_end = idx
-                    # print(x.date())
-            print(idx_end)
+
+            if 'Date' in df.columns:
+                for idx, x in enumerate(df.loc[:,'Date']):
+                    if x == pandas.to_datetime(beginning_date, format='%d/%m/%Y'):
+                        idx_beg = idx
+                        break
+                for idx, x in enumerate(df.loc[:, 'Date']):
+                    if x == pandas.to_datetime(ending_date, format='%d/%m/%Y'):
+                        idx_end = idx
+            elif 'Minuta' in df.columns:
+                for idx, x in enumerate(df.loc[:,'Minuta']): #or df.iloc[:,1]
+                    if x.date() == pandas.to_datetime(beginning_date, format='%d/%m/%Y').date():
+                        idx_beg = idx
+                        break
+                for idx, x in enumerate(df.loc[:, 'Minuta']):
+                    if x == pandas.to_datetime(ending_date, format='%d/%m/%Y'):
+                        idx_end = idx
 
             dfRange = (idx_beg, idx_end)
-            print(dfRange)
             return dfRange
 
         def selectData(df):
             '''function return cut version of data frame, cut alongside the row'''
             dfRange = selectDataRange(df)
 
+
             df = df.iloc[dfRange[0]:dfRange[1], :]
-            print(df)
             return(df)
-            pass
 
-
-        print("Entry below ")
-        print(self.parent.calendar_frame_begin.getEntry())
-        print(self.parent.calendar_frame_end.getEntry())
+        # print("Entry below ")
+        # print(self.parent.calendar_frame_begin.getEntry())
+        # print(self.parent.calendar_frame_end.getEntry())
         cb_checked_list = self.cb_checked()
         cb_checked_list_string = []
         for x in cb_checked_list: #here I think we create string list of boxes which are checked
@@ -289,16 +370,16 @@ class MainApplication(tk.Frame):
         radio_button_value = self.parent.rad_selected.get()
 
         if (radio_button_value == 0):
-            selectData(self.df_temp)
+            self.df = selectData(self.df_temp)
         elif (radio_button_value == 1):
-            selectData(self.df_hum)
+            self.df = selectData(self.df_hum)
 
         if (radio_button_value == 0):
             graph_title_name = "Temperatura"
             if version == "one_graph":
-                Plotter.Plotter().plot(cb_checked_list_string, self.df_temp, graph_title_name)
+                Plotter.Plotter().plot(cb_checked_list_string, self.df, graph_title_name)
             elif version == "many_graphs":
-                Plotter.Plotter().plotAllInOne(cb_checked_list_string, self.df_temp, graph_title_name)
+                Plotter.Plotter().plotAllInOne(cb_checked_list_string, self.df, graph_title_name)
         elif (radio_button_value == 1):
             graph_title_name = "Wilgotność"
             if version == "one_graph":

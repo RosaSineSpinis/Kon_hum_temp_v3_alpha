@@ -21,10 +21,10 @@ class OpenDirectoryPathClass():
             for filename in filenames:
                 if extension in filename:
                     if phrase_in_filename in filename:
-                        print('FILE INSIDE with' + phrase_in_filename + current_path + ': ' + filename)
+                        # print('FILE INSIDE with ' + phrase_in_filename + " " + current_path + ': ' + filename)
                         path_list.append(current_path + '/' + filename)
                         filename_list.append(filename)
 
-        print("Check below")
-        print(filename_list)
+        # print("Check below")
+        # print(filename_list)
         return filename_list, path_list

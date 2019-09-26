@@ -11,23 +11,23 @@ class CalendarDialog(tkSimpleDialog.Dialog):
         self.end_date = kw.pop('end_date', "01/01/2017")
         tkSimpleDialog.Dialog.__init__(self, parent, title=None) ##another constructor because inheritance
 
-        print("in init CF")
-        print(self.beg_date)
-        print(self.end_date)
+        # print("in init CF")
+        # print(self.beg_date)
+        # print(self.end_date)
 
-    print("we are in class CalendarDialog")
+    # print("we are in class CalendarDialog")
     def body(self, master):
-        print("we are in body")
+        # print("we are in body")
         self.calendar = ttkcalendar.Calendar(master, year=2017, month=1, beg_date=self.beg_date, end_date=self.end_date)
         self.calendar.pack()
 
     def apply(self):
-        print("we are in apply")
+        # print("we are in apply")
         self.result = self.calendar.selection
 
 
 class CalendarFrame(Tkinter.LabelFrame):
-    print("we are in CalendarFrame before init")
+    # print("we are in CalendarFrame before init")
 
     def __init__(self, master, text = "", **kw):
         Tkinter.LabelFrame.__init__(self, master, text=text)
@@ -35,7 +35,7 @@ class CalendarFrame(Tkinter.LabelFrame):
         self.beg_date = kw.pop('beg_date', "01/01/2017")  # ToDo in constructor send 'year' = 2019 or other minimal
         self.end_date = kw.pop('end_date', "01/01/2017")  # ToDo in constructor send 'month' = 2018 or other minimal
 
-        print("we are in CalendarFrame")
+        # print("we are in CalendarFrame")
 
 
         self.selected_date = Tkinter.StringVar()
@@ -44,15 +44,15 @@ class CalendarFrame(Tkinter.LabelFrame):
         Tkinter.Button(self, text="Choose a date", command=lambda: self.getdate(self.beg_date, self.end_date)).pack(side=Tkinter.LEFT)
 
     def getdate(self, beg_date, end_date):
-        print("we are in getdate")
-        print(beg_date, end_date)
+        # print("we are in getdate")
+        # print(beg_date, end_date)
         cd = CalendarDialog(self, beg_date=beg_date, end_date=end_date) #create new calendar HERE WE CREATE NEW OBJECT, there is wait option inside
-        print("get date after creating object")
+        # print("get date after creating object")
         result = cd.result #pickup result from calendar
-        print("get date after result")
+        # print("get date after result")
         self.selected_date.set(result.strftime("%d/%m/%Y")) #result converted into date/month/year
-        print("get date after conversion - end -getEntryBelow")
-        print(self.getEntry())
+        # print("get date after conversion - end -getEntryBelow")
+        # print(self.getEntry())
 
     def getEntry(self):
         if self.selected_date:

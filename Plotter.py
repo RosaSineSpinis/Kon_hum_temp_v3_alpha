@@ -20,7 +20,7 @@ class Plotter():
 
         # Convert to a datetime object
         dt = xmax - xmin
-        print(dt)
+        # print(dt)
 
 
         return None
