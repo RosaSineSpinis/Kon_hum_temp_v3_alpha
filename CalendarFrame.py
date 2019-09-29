@@ -40,8 +40,10 @@ class CalendarFrame(Tkinter.LabelFrame):
 
         self.selected_date = Tkinter.StringVar()
 
-        Tkinter.Entry(self, textvariable=self.selected_date).pack(side=Tkinter.LEFT)
-        Tkinter.Button(self, text="Choose a date", command=lambda: self.getdate(self.beg_date, self.end_date)).pack(side=Tkinter.LEFT)
+        self.my_entry = Tkinter.Entry(self, textvariable=self.selected_date)
+        self.my_entry.pack(side=Tkinter.LEFT)
+        self.my_button = Tkinter.Button(self, text="Choose a date", command=lambda: self.getdate(self.beg_date, self.end_date))
+        self.my_button.pack(side=Tkinter.LEFT)
 
     def getdate(self, beg_date, end_date):
         # print("we are in getdate")

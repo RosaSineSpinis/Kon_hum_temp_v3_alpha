@@ -33,41 +33,16 @@ class PandasDataFrameListToOneData():
             df.to_csv('rewritten_' + filename_list[idx])  # we save file to csv just in case
             frames.append(df)
             df = pandas.concat(frames, ignore_index=True)
-            # print(df)
-            # df.drop(df.columns[[12]], axis=1, inplace=True, errors='ignore')
-        # print(df)
         df.sort_values(by=[self.new_column_name], inplace=True, ascending=True) #sortning
         df = df.reset_index(drop=True) #reorganise index
         for column in df.columns[:]:
-            # print(column)
-            # print("df.loc[:, column] ")
-            # print(df.loc[:, column])
-            # print(" ")
             if df.loc[:, column].isnull().all():
-                # print("we are dropping")
-                # print(df.loc[:, column])
-                # print(df.loc[:, [column]])
                 df.drop(df.loc[:, [column]], axis=1, inplace=True) #remove columns with null
-                # print(df)
-        # print("out of for")
-        # print(df)
-        # print(type(df))
-        # print(df.iloc[:,1])
         if 'Date' in df.columns:
             df.loc[:,'Date'] = pandas.to_datetime(df.loc[:,'Date'], format='%d/%m/%Y')
-            # print(df)
         else:
-            # print(df.iloc[:,1])
-            df.iloc[:,1] = pandas.to_datetime(df.iloc[:,1], format='%m/%d/%Y')
-            # print(df)
-        # print(df)
-        # print(df.loc[:,'Date'])
-        # print(df.iloc[:,12])
-        # print(df.iloc[:, 11].isnull().all())
-        # print(df.iloc[:, 12].isnull().all())
-        # print(df)
-        # print(df.loc[:,self.new_column_name].dt.date)
-        # print(df.iloc[-1, df.columns.get_loc('Date')])
+            df.rename(columns = {df.columns[1]: 'Data'}, inplace=True)
+            df.iloc[:, 1] = pandas.to_datetime(df.iloc[:, 1], format='%m/%d/%Y')
         return df
     # except:
         #     raise

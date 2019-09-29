@@ -52,7 +52,10 @@ class Plotter():
             for col in row:
                 # ax.plot(df.iloc[:, 0], df.Strefa2)
                 ##ax.set_xticklabels= (df.iloc[:, 0])
+
                 for x in range(number_of_strefa):
+                    print(df.Date_time)
+                    print(strefa_name[x])
                     col.plot(df.Date_time, df[strefa_name[x]], label=strefa_name[x])
                 ##plt.xticks(df.iloc[:, 0], rotation='vertical')
 
